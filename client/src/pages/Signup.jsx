@@ -1,21 +1,29 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  signinFailluer,
+  signinStart,
+  signinSuccess,
+} from "../redox/user/userSlice";
 
 const Signup = () => {
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.user);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+    if (error) dispatch(signinFailluer(null));
   };
   console.log(formData);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
-      setError(false);
+      dispatch(signinStart());
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,17 +31,13 @@ const Signup = () => {
       });
       const data = await res.json();
       if (data.success === false) {
-        setError(data.message);
-        setLoading(false);
+        dispatch(signinFailluer(data.message));
         return;
       }
       navigate("/login");
-      setLoading(false);
-      setError(false);
-      console.log(data.message);
+      dispatch(signinSuccess(data));
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
+      dispatch(signinFailluer(error.message));
     }
   };
 

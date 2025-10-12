@@ -17,7 +17,7 @@ export const signup = async (req, res, next) => {
     await newUser.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
-    next(err);
+    next(errorHandler(401, "email already exist"));
   }
 };
 
@@ -42,7 +42,17 @@ export const login = async (req, res, next) => {
       .cookie("access_token", token, { httpOnly: true })
       .status(200)
       .json(ress);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(errorHandler(error));
+  }
+};
+
+// Logout
+export const logout = async (req, res, next) => {
+  try {
+    res.clearCookie("access_token");
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
   }
 };

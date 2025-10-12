@@ -15,6 +15,7 @@ const Login = () => {
   const { loading, error } = useSelector((state) => state.user);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+    if (error) dispatch(signinFailluer(null));
   };
   console.log(formData);
   const handleSubmit = async (e) => {
@@ -26,47 +27,23 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+      console.log(res);
+
       const data = await res.json();
       if (data.success === false) {
         dispatch(signinFailluer(data.message));
         return;
       }
-      dispatch(signinSuccess(data));
       if (data.role === "admin") {
         navigate("/admin/dashboard");
       } else {
         navigate("/");
       }
+      dispatch(signinSuccess(data));
     } catch (error) {
       dispatch(signinFailluer(error.message));
     }
   };
-
-  //   const handleSubmit = async (e) => {
-  //     e.preventDefault();
-  //     try {
-  //       setLoading(true);
-  //       setError(false);
-  //       const res = await fetch("/api/auth/login", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify(formData),
-  //       });
-  //       const data = await res.json();
-  //       if (data.success === false) {
-  //         setError(data.message);
-  //         setLoading(false);
-  //         return;
-  //       }
-  //       navigate("/login");
-  //       setLoading(false);
-  //       setError(false);
-  //       console.log(data.message);
-  //     } catch (error) {
-  //       setLoading(false);
-  //       setError(error.message);
-  //     }
-  //   };
 
   return (
     <div className="max-w-lg mx-auto">
